@@ -1,0 +1,461 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0912">
+<title>PixelDex | Pokédex</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg:#0b0912;
+  --panel:#15121f;
+  --panel2:#1d182a;
+  --border:#302740;
+  --purple:#a78bfa;
+  --green:#c1ff72;
+  --text:#f6f2ff;
+  --muted:#a49bb5;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:radial-gradient(ellipse at 50% -20%,#59318a55,transparent 55%),var(--bg);
+  color:var(--text);font-family:Inter,sans-serif;min-height:100vh
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.app{width:min(1200px,100%);margin:auto;padding:28px 24px 50px}
+header{display:flex;justify-content:space-between;align-items:center;gap:15px;padding-bottom:25px;border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:12px;font:700 25px 'Space Grotesk',sans-serif;letter-spacing:-1px}
+.logo{width:43px;height:43px;display:grid;place-items:center;border-radius:14px;background:var(--purple);color:#160e25;font-size:25px}
+.brand span{color:var(--purple)}
+.header-tag{font-size:11px;color:var(--green);border:1px solid #c1ff7240;padding:8px 11px;border-radius:99px;letter-spacing:1px}
+.hero{padding:42px 0 27px}
+.eyebrow{color:var(--green);font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase}
+h1{font:700 clamp(34px,6vw,55px) 'Space Grotesk',sans-serif;letter-spacing:-2px;margin:12px 0}
+h1 span{color:var(--purple)}
+.subtitle{color:var(--muted);line-height:1.7;font-size:14px;margin:0}
+.toolbar{display:grid;grid-template-columns:minmax(180px,1fr) 175px auto;gap:10px;margin:27px 0 15px}
+input,select{width:100%;min-width:0;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:13px 14px;border-radius:12px}
+input::placeholder{color:#82788f}
+select option{background:var(--panel)}
+.fav-btn,.random-btn{border:1px solid var(--border);border-radius:12px;padding:12px 15px;color:var(--text);background:var(--panel);white-space:nowrap}
+.fav-btn.active{border-color:var(--purple);background:#a78bfa18;color:var(--purple)}
+.random-btn{background:var(--green);color:#17150e;border-color:var(--green);font-weight:800}
+.random-btn:hover{filter:brightness(1.08)}
+.result-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:12px}
+.result-row strong{color:var(--text)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.card{position:relative;overflow:hidden;background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:16px;transition:transform .2s,border-color .2s;animation:fade .3s ease both}
+.card:hover{transform:translateY(-5px);border-color:#8b6bd0}
+@keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.card-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.dex-id{color:#81758f;font-size:11px;font-weight:800;letter-spacing:1px}
+.heart{border:0;background:transparent;color:#71667f;font-size:21px;padding:0 2px;line-height:1}
+.heart.saved{color:#ff76b7}
+.art{position:relative;display:grid;place-items:center;height:150px;margin:9px 0;background:radial-gradient(ellipse,#a78bfa24,transparent 65%);border-radius:14px}
+.art::before{content:"";position:absolute;width:105px;height:105px;border:1px dashed #a78bfa30;border-radius:50%}
+.art img{position:relative;width:145px;height:145px;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 7px 10px #0005);transition:transform .2s}
+.card:hover .art img{transform:scale(1.09)}
+.pokemon-name{font:700 19px 'Space Grotesk',sans-serif;text-transform:capitalize;margin:8px 0 10px}
+.types{display:flex;gap:6px;flex-wrap:wrap}
+.type{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:800;padding:5px 8px;border-radius:7px;background:#a78bfa18;color:#c5afff}
+.type.grass{background:#b5ff6515;color:#c1ff72}
+.type.fire{background:#ff85551a;color:#ffab8a}
+.type.water{background:#69baff18;color:#86caff}
+.type.electric{background:#ffe66b18;color:#ffe27b}
+.type.poison{background:#d879ff18;color:#e2a3ff}
+.type.bug{background:#b5ff6515;color:#c1ff72}
+.type.normal{background:#bdb4ce18;color:#c9bfd8}
+.type.fairy{background:#ff8acb18;color:#ff9ed6}
+.type.ground,.type.rock{background:#d8ae6a18;color:#e4c18b}
+.type.fighting,.type.dragon{background:#ff755b18;color:#ff9b88}
+.type.psychic,.type.ghost{background:#bd8cff18;color:#c5a4ff}
+.type.ice{background:#83fff018;color:#83fff0}
+.type.dark{background:#aaa0b818;color:#c1b6cf}
+.type.steel{background:#9eb8d718;color:#b4cce7}
+.type.flying{background:#94aaff18;color:#a9b9ff}
+.stats{display:flex;gap:6px;margin-top:15px}
+.stat{flex:1;background:var(--panel2);border-radius:8px;padding:8px 5px;text-align:center}
+.stat small{display:block;color:var(--muted);font-size:9px;margin-bottom:4px}
+.stat strong{font-size:12px;color:var(--green)}
+.details-btn{width:100%;margin-top:12px;border:1px solid var(--border);border-radius:9px;background:transparent;color:#d8cafa;padding:10px;font-size:12px;font-weight:700}
+.details-btn:hover{background:#a78bfa14;border-color:var(--purple)}
+.state{grid-column:1/-1;text-align:center;padding:60px 15px;color:var(--muted)}
+.state-icon{font-size:38px;margin-bottom:12px}
+.state h2{color:var(--text);font:600 21px 'Space Grotesk',sans-serif}
+.state p{font-size:13px;line-height:1.6}
+.load-btn{margin-top:25px;padding:12px 20px;border-radius:10px;border:0;background:var(--purple);font-weight:800;color:#150e22}
+.load-more-wrap{text-align:center;padding:28px 0}
+.load-more{background:transparent;border:1px solid var(--border);color:var(--text);border-radius:11px;padding:13px 24px}
+.load-more:hover{border-color:var(--green);color:var(--green)}
+footer{border-top:1px solid var(--border);padding-top:22px;text-align:center;color:#80768e;font-size:11px;line-height:1.8}
+footer span{color:var(--purple)}
+footer a{color:var(--green);text-decoration:none}
+.modal{position:fixed;inset:0;z-index:10;background:#07060bd9;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.open{display:flex}
+.modal-box{width:min(480px,100%);max-height:90vh;overflow:auto;position:relative;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:25px}
+.close-modal{position:absolute;right:17px;top:15px;background:var(--panel2);border:0;border-radius:9px;color:var(--text);padding:7px 11px;font-size:18px}
+.modal-art{text-align:center;background:radial-gradient(ellipse,#a78bfa26,transparent 65%);margin:10px 0}
+.modal-art img{width:190px;height:190px;object-fit:contain}
+.modal h2{text-transform:capitalize;font:700 29px 'Space Grotesk',sans-serif;margin:5px 0 15px}
+.modal h3{font:600 14px 'Space Grotesk',sans-serif;margin-top:25px}
+.stat-line{margin:13px 0}
+.stat-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;color:var(--muted)}
+.stat-track{height:6px;background:var(--panel2);border-radius:10px;overflow:hidden}
+.stat-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--green));border-radius:10px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){
+  .app{padding:20px 14px 35px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .card{padding:12px}
+  .art{height:125px}
+  .art img{width:125px;height:125px}
+  .toolbar{grid-template-columns:1fr 1fr}
+  .toolbar input{grid-column:1/-1}
+  .fav-btn,.random-btn{font-size:12px;padding:11px 7px}
+  .header-tag{font-size:9px;letter-spacing:.5px}
+  .brand{font-size:22px}
+  .hero{padding-top:32px}
+}
+@media(max-width:360px){.grid{grid-template-columns:1fr}.art{height:160px}.art img{width:150px;height:150px}}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><div class="logo">◉</div>Pixel<span>Dex</span></div>
+    <div class="header-tag">✦ PLAYER ONE</div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">▸ Sua aventura começa aqui</div>
+    <h1>Descubra seu <span>próximo favorito.</span></h1>
+    <p class="subtitle">Explore Pokémon, conheça seus atributos e monte sua coleção pessoal.</p>
+  </section>
+
+  <section class="toolbar" aria-label="Busca e filtros">
+    <input id="search" type="search" placeholder="⌕  Buscar por nome ou número..." aria-label="Buscar Pokémon">
+    <select id="typeFilter" aria-label="Filtrar por tipo">
+      <option value="">Todos os tipos</option>
+      <option value="normal">Normal</option><option value="fire">Fogo</option>
+      <option value="water">Água</option><option value="electric">Elétrico</option>
+      <option value="grass">Planta</option><option value="ice">Gelo</option>
+      <option value="fighting">Lutador</option><option value="poison">Veneno</option>
+      <option value="ground">Terra</option><option value="flying">Voador</option>
+      <option value="psychic">Psíquico</option><option value="bug">Inseto</option>
+      <option value="rock">Pedra</option><option value="ghost">Fantasma</option>
+      <option value="dragon">Dragão</option><option value="dark">Sombrio</option>
+      <option value="steel">Aço</option><option value="fairy">Fada</option>
+    </select>
+    <button class="fav-btn" id="favFilter" aria-pressed="false">♡ Favoritos</button>
+    <button class="random-btn" id="randomBtn">🎲 Surpresa</button>
+  </section>
+
+  <div class="result-row">
+    <span id="resultText">Carregando Pokédex...</span>
+    <span>ORDENADO POR <strong>Nº DEX</strong></span>
+  </div>
+
+  <section class="grid" id="pokemonGrid" aria-live="polite">
+    <div class="state"><div class="state-icon">⌛</div><h2>Carregando a Pokédex...</h2><p>Chamando os Pokémon para a aventura.</p></div>
+  </section>
+
+  <div class="load-more-wrap">
+    <button class="load-more" id="loadMore" hidden>Carregar mais Pokémon ↓</button>
+  </div>
+
+  <footer>
+    Criado com <span>♥</span> e JavaScript · PixelDex<br>
+    Dados fornecidos pela <a href="https://pokeapi.co/" target="_blank" rel="noopener noreferrer">PokéAPI</a>.
+    Pokémon é uma marca de seus respectivos titulares. Projeto de fã, sem afiliação oficial.
+  </footer>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+  <div class="modal-box">
+    <button class="close-modal" id="closeModal" aria-label="Fechar">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+const API = 'https://pokeapi.co/api/v2/pokemon/';
+const grid = document.getElementById('pokemonGrid');
+const search = document.getElementById('search');
+const typeFilter = document.getElementById('typeFilter');
+const favFilter = document.getElementById('favFilter');
+const loadMoreBtn = document.getElementById('loadMore');
+const resultText = document.getElementById('resultText');
+const modal = document.getElementById('modal');
+const modalContent = document.getElementById('modalContent');
+
+const typeNames = {
+  normal:'Normal', fire:'Fogo', water:'Água', electric:'Elétrico',
+  grass:'Planta', ice:'Gelo', fighting:'Lutador', poison:'Veneno',
+  ground:'Terra', flying:'Voador', psychic:'Psíquico', bug:'Inseto',
+  rock:'Pedra', ghost:'Fantasma', dragon:'Dragão', dark:'Sombrio',
+  steel:'Aço', fairy:'Fada'
+};
+
+let pokemonList = [];
+let visibleCount = 24;
+let favorites = loadFavorites();
+let onlyFavorites = false;
+let requestNumber = 0;
+
+function loadFavorites() {
+  try {
+    const value = JSON.parse(localStorage.getItem('pixeldex-favorites') || '[]');
+    return new Set(Array.isArray(value) ? value.filter(Number.isInteger) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveFavorites() {
+  try {
+    localStorage.setItem('pixeldex-favorites', JSON.stringify([...favorites]));
+  } catch {
+    // A coleção continua funcionando durante esta sessão.
+  }
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  })[char]);
+}
+
+function spriteFor(pokemon) {
+  return pokemon.sprites?.other?.['official-artwork']?.front_default
+    || pokemon.sprites?.front_default
+    || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`;
+}
+
+function numberLabel(id) {
+  return '#' + String(id).padStart(3, '0');
+}
+
+function showState(title, message, icon = '⌕', retry = false) {
+  grid.replaceChildren();
+  const box = document.createElement('div');
+  box.className = 'state';
+  box.innerHTML = `<div class="state-icon">${icon}</div><h2>${escapeHTML(title)}</h2><p>${escapeHTML(message)}</p>`;
+  if (retry) {
+    const button = document.createElement('button');
+    button.className = 'load-btn';
+    button.textContent = 'Tentar novamente';
+    button.addEventListener('click', init);
+    box.appendChild(button);
+  }
+  grid.appendChild(box);
+}
+
+async function init() {
+  showState('Carregando a Pokédex...', 'Buscando os primeiros Pokémon. ⌛');
+  resultText.textContent = 'Conectando à PokéAPI...';
+  loadMoreBtn.hidden = true;
+
+  try {
+    const response = await fetch(`${API}?limit=151`);
+    if (!response.ok) throw new Error('Falha na API');
+    const data = await response.json();
+
+    pokemonList = await Promise.all(data.results.map(async item => {
+      const res = await fetch(item.url);
+      if (!res.ok) throw new Error('Falha ao carregar Pokémon');
+      return res.json();
+    }));
+
+    pokemonList.sort((a, b) => a.id - b.id);
+    render();
+  } catch (error) {
+    showState('Não conseguimos conectar', 'Confere tua conexão e tenta novamente. A PokéAPI precisa de internet para carregar os dados.', '⚡', true);
+    resultText.textContent = 'Erro ao carregar dados';
+  }
+}
+
+function render() {
+  const requestId = ++requestNumber;
+  const query = search.value.trim().toLocaleLowerCase('pt-BR');
+  const selectedType = typeFilter.value;
+
+  let filtered = pokemonList.filter(pokemon => {
+    const name = pokemon.name.toLocaleLowerCase('pt-BR');
+    const matchesSearch = name.includes(query) || String(pokemon.id) === query.replace(/^#/, '');
+    const matchesType = !selectedType || pokemon.types.some(item => item.type.name === selectedType);
+    const matchesFav = !onlyFavorites || favorites.has(pokemon.id);
+    return matchesSearch && matchesType && matchesFav;
+  });
+
+  const shown = filtered.slice(0, visibleCount);
+  resultText.innerHTML = `Encontrados <strong>${filtered.length}</strong> Pokémon`;
+  grid.replaceChildren();
+
+  if (!shown.length) {
+    showState('Nenhum Pokémon encontrado', 'Tenta outro nome, número ou tipo. Sua próxima descoberta está por aí.', '◇');
+    loadMoreBtn.hidden = true;
+    return;
+  }
+
+  shown.forEach(pokemon => grid.appendChild(makeCard(pokemon)));
+  loadMoreBtn.hidden = shown.length >= filtered.length;
+
+  // Mantém o identificador atualizado caso a busca mude durante uma operação.
+  if (requestId !== requestNumber) return;
+}
+
+function makeCard(pokemon) {
+  const card = document.createElement('article');
+  card.className = 'card';
+
+  const saved = favorites.has(pokemon.id);
+  const typesHTML = pokemon.types.map(item => {
+    const type = item.type.name;
+    return `<span class="type ${type}">${escapeHTML(typeNames[type] || type)}</span>`;
+  }).join('');
+
+  card.innerHTML = `
+    <div class="card-top">
+      <span class="dex-id">${numberLabel(pokemon.id)}</span>
+      <button class="heart ${saved ? 'saved' : ''}" aria-label="${saved ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" aria-pressed="${saved}">${saved ? '♥' : '♡'}</button>
+    </div>
+    <div class="art"><img src="${escapeHTML(spriteFor(pokemon))}" alt="${escapeHTML(pokemon.name)}" loading="lazy"></div>
+    <h2 class="pokemon-name">${escapeHTML(pokemon.name)}</h2>
+    <div class="types">${typesHTML}</div>
+    <div class="stats">
+      <div class="stat"><small>ALTURA</small><strong>${(pokemon.height / 10).toFixed(1)} m</strong></div>
+      <div class="stat"><small>PESO</small><strong>${(pokemon.weight / 10).toFixed(1)} kg</strong></div>
+    </div>
+    <button class="details-btn">Ver atributos ↗</button>
+  `;
+
+  card.querySelector('.heart').addEventListener('click', () => toggleFavorite(pokemon.id));
+  card.querySelector('.details-btn').addEventListener('click', () => showDetails(pokemon));
+  const img = card.querySelector('img');
+  img.addEventListener('error', () => {
+    img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`;
+  }, { once: true });
+
+  return card;
+}
+
+function toggleFavorite(id) {
+  if (favorites.has(id)) favorites.delete(id);
+  else favorites.add(id);
+  saveFavorites();
+  render();
+}
+
+function showDetails(pokemon) {
+  const statNames = {
+    hp:'Vida', attack:'Ataque', defense:'Defesa',
+    'special-attack':'Ataque especial', 'special-defense':'Defesa especial',
+    speed:'Velocidade'
+  };
+
+  const statsHTML = pokemon.stats.map(item => {
+    const name = statNames[item.stat.name] || item.stat.name;
+    const value = item.base_stat;
+    const width = Math.min(value / 180 * 100, 100);
+    return `
+      <div class="stat-line">
+        <div class="stat-label"><span>${name}</span><strong>${value}</strong></div>
+        <div class="stat-track"><div class="stat-fill" style="width:${width}%"></div></div>
+      </div>`;
+  }).join('');
+
+  const abilities = pokemon.abilities.map(item =>
+    escapeHTML(item.ability.name.replaceAll('-', ' '))
+  ).join(', ');
+
+  modalContent.innerHTML = `
+    <div class="modal-art"><img src="${escapeHTML(spriteFor(pokemon))}" alt="${escapeHTML(pokemon.name)}"></div>
+    <div class="dex-id">${numberLabel(pokemon.id)} · PIXELDEX</div>
+    <h2 id="modalName">${escapeHTML(pokemon.name)}</h2>
+    <div class="types">${pokemon.types.map(item => {
+      const type = item.type.name;
+      return `<span class="type ${type}">${escapeHTML(typeNames[type] || type)}</span>`;
+    }).join('')}</div>
+    <h3>ATRIBUTOS BASE</h3>
+    ${statsHTML}
+    <h3>HABILIDADES</h3>
+    <p style="color:var(--muted);font-size:13px;text-transform:capitalize">${abilities}</p>
+    <div class="stats">
+      <div class="stat"><small>ALTURA</small><strong>${(pokemon.height / 10).toFixed(1)} m</strong></div>
+      <div class="stat"><small>PESO</small><strong>${(pokemon.weight / 10).toFixed(1)} kg</strong></div>
+      <div class="stat"><small>EXP. BASE</small><strong>${pokemon.base_experience ?? 'N/A'}</strong></div>
+    </div>`;
+
+  modal.classList.add('open');
+  document.getElementById('closeModal').focus();
+}
+
+function closeModal() {
+  modal.classList.remove('open');
+}
+
+document.getElementById('closeModal').addEventListener('click', closeModal);
+modal.addEventListener('click', event => {
+  if (event.target === modal) closeModal();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeModal();
+});
+
+search.addEventListener('input', () => {
+  visibleCount = 24;
+  render();
+});
+
+typeFilter.addEventListener('change', () => {
+  visibleCount = 24;
+  render();
+});
+
+favFilter.addEventListener('click', () => {
+  onlyFavorites = !onlyFavorites;
+  favFilter.classList.toggle('active', onlyFavorites);
+  favFilter.setAttribute('aria-pressed', String(onlyFavorites));
+  favFilter.textContent = onlyFavorites ? '♥ Favoritos' : '♡ Favoritos';
+  visibleCount = 24;
+  render();
+});
+
+loadMoreBtn.addEventListener('click', () => {
+  visibleCount += 24;
+  render();
+});
+
+document.getElementById('randomBtn').addEventListener('click', () => {
+  let choices = pokemonList.filter(pokemon =>
+    (!onlyFavorites || favorites.has(pokemon.id)) &&
+    (!typeFilter.value || pokemon.types.some(item => item.type.name === typeFilter.value))
+  );
+
+  if (search.value.trim()) {
+    const query = search.value.trim().toLowerCase();
+    choices = choices.filter(pokemon =>
+      pokemon.name.includes(query) || String(pokemon.id) === query.replace(/^#/, '')
+    );
+  }
+
+  if (!choices.length) {
+    showState('Sem Pokémon para sortear', 'Muda os filtros ou adiciona Pokémon aos favoritos.', '🎲');
+    return;
+  }
+
+  const chosen = choices[Math.floor(Math.random() * choices.length)];
+  showDetails(chosen);
+});
+
+init();
+</script>
+</body>
+</html>
